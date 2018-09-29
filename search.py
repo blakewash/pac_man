@@ -137,6 +137,14 @@ def depthFirstTreeSearch(problem):
     (that is, a list of strings such as ['North', 'North', 'West'])
     """
     '''YOUR CODE HERE'''
+
+    print("Start:")
+    print(problem.getStartState())
+    print("Is the start a goal? ")
+    print(problem.isGoalState(problem.getStartState()))
+    print("Start's successors: ")
+    print(problem.getSuccessors(problem.getStartState()))
+
     util.raiseNotDefined()
 
 
@@ -151,7 +159,13 @@ def depthFirstSearch(problem):
     Search the deepest nodes in the search tree first.
     Use a graph search here.
     """
-    '''YOUR CODE HERE'''
+    print("Start:")
+    print(problem.getStartState())
+    print("Is the start a goal? ")
+    print(problem.isGoalState(problem.getStartState()))
+    print("Start's successors: ")
+    print(problem.getSuccessors(problem.getStartState()))
+
     util.raiseNotDefined()
 
 
