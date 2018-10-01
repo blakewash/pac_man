@@ -80,8 +80,24 @@ class Node:
     Note that you should override the  __hash__ and __eq__ internal methods.
     """
 
-    def __init__(self):
-        '''YOUR CODE HERE'''
+    def __init__(self, l):
+        self.track = []
+        self.actions = []
+        i = 0
+        for x in l:
+            self.track.insert(i,x[0])
+            self.actions.insert(i,x[1])
+            i += 1
+
+    def add(self, state):
+        self.track.insert(len(self.track), state)
+
+    def pop(self):
+        self.track.pop()
+    
+    def get_state(self):
+        return self.track[len(self.track) - 1]
+
 
     def __hash__(self):
         '''YOUR CODE HERE'''
@@ -91,6 +107,10 @@ class Node:
         '''YOUR CODE HERE'''
         return None
 
+    "Empty out list of actions"
+    def untrace(self):
+        self.actions = []
+
     def trace(self):
         """
         Return the list of actions by tracing through
@@ -98,8 +118,8 @@ class Node:
 
         Recommended but not required to have.
         """
-        '''YOUR CODE HERE'''
-        return None
+        
+        return self.actions
 
 
 def depthFirstTreeSearch(problem):
@@ -138,6 +158,9 @@ def depthFirstTreeSearch(problem):
     """
     '''YOUR CODE HERE'''
 
+    current = problem.getStartState()
+    fringe = util.Stack()
+
     print("Start:")
     print(problem.getStartState())
     print("Is the start a goal? ")
@@ -151,6 +174,31 @@ def depthFirstTreeSearch(problem):
 def breadthFirstTreeSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     '''YOUR CODE HERE'''
+
+    l = []
+    c = problem.getStartState()
+    l.insert(0, (c,NORTH,22))
+    n = Node(l)
+    n.untrace()
+    fringe = util.Queue()
+    level = 0
+
+    while problem.isGoalState(c) != True:
+        l = problem.getSuccessors(c)
+        for x in l:
+            n.add(x[0])
+            fringe.push(Node(n.track))
+            n.pop()
+        if len(fringe.list) == 0:
+            break
+        n = fringe.list.pop()
+        c = n.get_state()
+
+    if problem.isGoalState(c):
+        print("Goal Reached!")
+    else:
+        print("Goal not found.") 
+
     util.raiseNotDefined()
 
 
