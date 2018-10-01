@@ -80,20 +80,31 @@ class Node:
     Note that you should override the  __hash__ and __eq__ internal methods.
     """
 
-    def __init__(self, l):
+    def __init__(self, l, a, t):
         self.track = []
         self.actions = []
+        self.total = 0
         i = 0
         for x in l:
-            self.track.insert(i,x[0])
-            self.actions.insert(i,x[1])
+            self.track.insert(i,x)
             i += 1
+        i = 0
+        for y in a:
+            self.actions.insert(i,y)
+            i += 1
+        self.total = t
 
-    def add(self, state):
-        self.track.insert(len(self.track), state)
+
+    def add(self, item):
+        self.track.insert(len(self.track), item[0])
+        self.actions.insert(len(self.actions), item[1])
+        self.minus = item[2]
+        self.total += self.minus
 
     def pop(self):
         self.track.pop()
+        self.actions.pop()
+        self.total -= self.minus
     
     def get_state(self):
         return self.track[len(self.track) - 1]
@@ -106,10 +117,6 @@ class Node:
     def __eq__(self, other):
         '''YOUR CODE HERE'''
         return None
-
-    "Empty out list of actions"
-    def untrace(self):
-        self.actions = []
 
     def trace(self):
         """
@@ -158,36 +165,17 @@ def depthFirstTreeSearch(problem):
     """
     '''YOUR CODE HERE'''
 
-    current = problem.getStartState()
-    fringe = util.Stack()
-
-    print("Start:")
-    print(problem.getStartState())
-    print("Is the start a goal? ")
-    print(problem.isGoalState(problem.getStartState()))
-    print("Start's successors: ")
-    print(problem.getSuccessors(problem.getStartState()))
-
-    util.raiseNotDefined()
-
-
-def breadthFirstTreeSearch(problem):
-    """Search the shallowest nodes in the search tree first."""
-    '''YOUR CODE HERE'''
-
     l = []
     c = problem.getStartState()
-    l.insert(0, (c,NORTH,22))
-    n = Node(l)
-    n.untrace()
-    fringe = util.Queue()
-    level = 0
+    l.insert(0,c)
+    n = Node(l, [], 0)
+    fringe = util.Stack()
 
     while problem.isGoalState(c) != True:
         l = problem.getSuccessors(c)
         for x in l:
-            n.add(x[0])
-            fringe.push(Node(n.track))
+            n.add(x)
+            fringe.push(Node(n.track, n.actions, n.total))
             n.pop()
         if len(fringe.list) == 0:
             break
@@ -199,7 +187,36 @@ def breadthFirstTreeSearch(problem):
     else:
         print("Goal not found.") 
 
-    util.raiseNotDefined()
+    return n.trace()
+
+
+def breadthFirstTreeSearch(problem):
+    """Search the shallowest nodes in the search tree first."""
+    '''YOUR CODE HERE'''
+
+    l = []
+    c = problem.getStartState()
+    l.insert(0,c)
+    n = Node(l, [] , 0)
+    fringe = util.Queue()
+
+    while problem.isGoalState(c) != True:
+        l = problem.getSuccessors(c)
+        for x in l:
+            n.add(x)
+            fringe.push(Node(n.track, n.actions, n.total))
+            n.pop()
+        if len(fringe.list) == 0:
+            break
+        n = fringe.list.pop()
+        c = n.get_state()
+
+    if problem.isGoalState(c):
+        print("Goal Reached!")
+    else:
+        print("Goal not found.") 
+
+    return n.trace()
 
 
 def depthFirstSearch(problem):
@@ -207,23 +224,65 @@ def depthFirstSearch(problem):
     Search the deepest nodes in the search tree first.
     Use a graph search here.
     """
-    print("Start:")
-    print(problem.getStartState())
-    print("Is the start a goal? ")
-    print(problem.isGoalState(problem.getStartState()))
-    print("Start's successors: ")
-    print(problem.getSuccessors(problem.getStartState()))
+    l = []
+    closed = []
+    c = problem.getStartState()
+    l.insert(0,c)
+    closed.insert(0,c)
+    n = Node(l, [], 0)
+    fringe = util.Stack()
 
-    util.raiseNotDefined()
+    while problem.isGoalState(c) != True:
+        l = problem.getSuccessors(c)
+        for x in l:
+            n.add(x)
+            if n.get_state() not in closed:
+                fringe.push(Node(n.track, n.actions, n.total))
+                closed.insert(0,n.get_state())
+            n.pop()
+        if len(fringe.list) == 0:
+            break
+        n = fringe.list.pop()
+        c = n.get_state()
+        closed.insert(0,c)
+
+    if problem.isGoalState(c):
+        print("Goal Reached!")
+    else:
+        print("Goal not found.") 
+
+    return n.trace()
 
 
 def breadthFirstSearch(problem):
-    """
-    Search the shallowest nodes in the search tree first.
-    Use a graph search here.
-    """
-    '''YOUR CODE HERE'''
-    util.raiseNotDefined()
+    l = []
+    closed = []
+    c = problem.getStartState()
+    l.insert(0,c)
+    closed.insert(0,c)
+    n = Node(l, [], 0)
+    fringe = util.Queue()
+
+    while problem.isGoalState(c) != True:
+        l = problem.getSuccessors(c)
+        for x in l:
+            n.add(x)
+            if n.get_state() not in closed:
+                fringe.push(Node(n.track, n.actions, n.total))
+                closed.insert(0,n.get_state())
+            n.pop()
+        if len(fringe.list) == 0:
+            break
+        n = fringe.list.pop()
+        c = n.get_state()
+        closed.insert(0,c)
+
+    if problem.isGoalState(c):
+        print("Goal Reached!")
+    else:
+        print("Goal not found.") 
+
+    return n.trace()
 
 
 def iterativeDeepeningSearch(problem):
@@ -233,13 +292,73 @@ def iterativeDeepeningSearch(problem):
     Write this function iteratively, not recursively.
     """
     '''YOUR CODE HERE'''
-    util.raiseNotDefined()
+    limit = 1000
+    c = problem.getStartState()
+    if problem.isGoalState(c):
+        print("Goal Reached!")
+        return []
+
+    for i in range (0,limit):
+        l = []
+        closed = []
+        c = problem.getStartState()
+        l.insert(0,c)
+        closed.insert(0,c)
+        n = Node(l, [], 0)
+        fringe = util.Stack()
+        for j in range (0,i):
+            if problem.isGoalState(c):
+                print("Goal Reached!")
+                return n.trace()
+            l = problem.getSuccessors(c)
+            for x in l:
+                n.add(x)
+                if n.get_state() not in closed:
+                    fringe.push(Node(n.track, n.actions, n.total))
+                    closed.insert(0,n.get_state())
+                n.pop()
+            if len(fringe.list) == 0:
+                "failed"
+                return n.trace()
+            n = fringe.list.pop()
+            c = n.get_state()
+            closed.insert(0,c)
+
+
+    return n.trace()
 
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     '''YOUR CODE HERE'''
-    util.raiseNotDefined()
+    l = []
+    closed = []
+    c = problem.getStartState()
+    l.insert(0,c)
+    closed.insert(0,c)
+    n = Node(l, [], 0)
+    fringe = util.PriorityQueue()
+
+    while problem.isGoalState(c) != True:
+        l = problem.getSuccessors(c)
+        for x in l:
+            n.add(x)
+            if n.get_state() not in closed:
+                fringe.push(Node(n.track, n.actions, n.total), n.total)
+                closed.insert(0,n.get_state())
+            n.pop()
+        if len(fringe.heap) == 0:
+            break
+        n = fringe.pop()
+        c = n.get_state()
+        closed.insert(0,c)
+
+    if problem.isGoalState(c):
+        print("Goal Reached!")
+    else:
+        print("Goal not found.") 
+
+    return n.trace()
 
 
 def nullHeuristic(state, problem=None):
@@ -253,7 +372,34 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     '''YOUR CODE HERE'''
-    util.raiseNotDefined()
+    l = []
+    closed = []
+    c = problem.getStartState()
+    l.insert(0,c)
+    closed.insert(0,c)
+    n = Node(l, [], 0)
+    fringe = util.PriorityQueue()
+
+    while problem.isGoalState(c) != True:
+        l = problem.getSuccessors(c)
+        for x in l:
+            n.add(x)
+            if n.get_state() not in closed:
+                fringe.push(Node(n.track, n.actions, n.total), n.total + heuristic(c, problem))
+                closed.insert(0,n.get_state())
+            n.pop()
+        if len(fringe.heap) == 0:
+            break
+        n = fringe.pop()
+        c = n.get_state()
+        closed.insert(0,c)
+
+    if problem.isGoalState(c):
+        print("Goal Reached!")
+    else:
+        print("Goal not found.") 
+
+    return n.trace()
 
 
 # Abbreviations
